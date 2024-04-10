@@ -8,6 +8,7 @@ import traceback
 from datetime import datetime
 
 CLIENT_STATS = {}
+CLIENT_ORDER = []
 
 async def main(config):
     # Start the display thread
@@ -66,12 +67,23 @@ def make_stats_object(message):
     return obj
 
 def init(config):
-    print('Processing config')
+    global CLIENT_ORDER
+    CLIENT_ORDER = config['client_order']
 
 def stats_display():
     while True:
-        print(CLIENT_STATS)
-        time.sleep(2)
+        chosen_client = None
+        
+        for ordered_client in CLIENT_ORDER:
+            if ordered_client in CLIENT_STATS:
+                chosen_client = ordered_client
+                break
+
+        if chosen_client is None and len(CLIENT_STATS) > 0:
+            chosen_client = sorted(CLIENT_STATS.keys())[0]
+
+        print(chosen_client)
+        time.sleep(1)
 
 def cleanup(timeout):
     global CLIENT_STATS
