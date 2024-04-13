@@ -6,9 +6,13 @@ import websockets
 import re
 import traceback
 from datetime import datetime
+from gpiozero import PWMOutputDevice
 
 CLIENT_STATS = {}
 CLIENT_ORDER = []
+
+CPU_METER = None
+MEM_METER = None
 
 async def main(config):
     # Start the display thread
@@ -40,7 +44,7 @@ async def receive_client(websocket):
             print(message)
             hostname = get_hostname(message)
             CLIENT_STATS[hostname] = make_stats_object(message)
-            
+
             # Send a response so the connection stays alive
             await websocket.send('')
     except websockets.exceptions.ConnectionClosedOK:
@@ -62,13 +66,19 @@ def make_stats_object(message):
     # Take the part after the : and split on _s
     values = message[message.index(':') + 1:-1].split('_')
     obj['cores'] = values[0]
-    obj['cpu%'] = values[1]
-    obj['mem%'] = values[2]
+    obj['cpu_percent'] = values[1]
+    obj['mem_percent'] = values[2]
     return obj
 
 def init(config):
     global CLIENT_ORDER
+    global CPU_METER
+    global MEM_METER
+
     CLIENT_ORDER = config['client_order']
+
+    CPU_METER = PWMOutputDevice(int(config['cpu_gpio']))
+    MEM_METER = PWMOutputDevice(int(config['mem_gpio']))
 
 def stats_display():
     while True:
@@ -82,8 +92,28 @@ def stats_display():
         if chosen_client is None and len(CLIENT_STATS) > 0:
             chosen_client = sorted(CLIENT_STATS.keys())[0]
 
-        print(chosen_client)
+        if chosen_client is None:
+            clear_display()
+        else:
+            stats = CLIENT_STATS[chosen_client]
+            # Set the meters
+            set_meter_percent(CPU_METER, stats['cpu_percent'])
+            set_meter_percent(MEM_METER, stats['mem_percent'])
+
         time.sleep(1)
+
+def clear_display():
+    set_meter_percent(CPU_METER, 0)
+    set_meter_percent(MEM_METER, 0)
+
+def set_meter_percent(meter, percent):
+    meter_value = float(percent) / 100
+    if meter_value < 0:
+        meter_value = 0
+    elif meter_value > 1:
+        meter_value = 1
+
+    meter.value = meter_value
 
 def cleanup(timeout):
     global CLIENT_STATS
