@@ -1,4 +1,4 @@
-Requires python3-dev and liblgpio-dev
+Requires python3-dev
 
 
 python3 -m venv .venv
