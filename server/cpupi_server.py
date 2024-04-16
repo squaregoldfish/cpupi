@@ -6,7 +6,7 @@ import websockets
 import re
 import traceback
 from datetime import datetime
-from gpiozero import PWMOutputDevice
+from rpi_hardware_pwm import HardwarePWM
 
 CLIENT_STATS = {}
 CLIENT_ORDER = []
@@ -77,8 +77,10 @@ def init(config):
 
     CLIENT_ORDER = config['client_order']
 
-    CPU_METER = PWMOutputDevice(int(config['cpu_gpio']))
-    MEM_METER = PWMOutputDevice(int(config['mem_gpio']))
+    CPU_METER = HardwarePWM(pwm_channel=0, hz=60, chip=0)
+    CPU_METER.start(0)
+    MEM_METER = HardwarePWM(pwm_channel=1, hz=60, chip=0)
+    MEM_METER.start(0)
 
 def stats_display():
     while True:
@@ -107,13 +109,13 @@ def clear_display():
     set_meter_percent(MEM_METER, 0)
 
 def set_meter_percent(meter, percent):
-    meter_value = float(percent) / 100
+    meter_value = float(percent)
     if meter_value < 0:
         meter_value = 0
-    elif meter_value > 1:
-        meter_value = 1
+    elif meter_value > 100:
+        meter_value = 100
 
-    meter.value = meter_value
+    meter.change_duty_cycle(meter_value)
 
 def cleanup(timeout):
     global CLIENT_STATS

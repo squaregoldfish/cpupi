@@ -1,0 +1,3 @@
+dtoverlay=pwm-2chan
+
+(Disable DRM VC4 V3D driver)

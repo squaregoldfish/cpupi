@@ -1,0 +1,16 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+adafruit-circuitpython-charlcd = "*"
+"rpi.gpio" = "*"
+rpi-hardware-pwm = "*"
+toml = "*"
+websockets = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3"
