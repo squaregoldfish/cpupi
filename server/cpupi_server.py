@@ -68,6 +68,12 @@ def make_stats_object(message):
     obj['cores'] = values[0]
     obj['cpu_percent'] = values[1]
     obj['mem_percent'] = values[2]
+    obj['load1'] = values[3]
+    obj['load5'] = values[4]
+    obj['batt_percent'] = values[5]
+    obj['batt_time'] = values[6]
+    obj['uptime'] = values[7]
+    
     return obj
 
 def init(config):

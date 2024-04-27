@@ -9,6 +9,7 @@ import time
 import websockets
 import asyncio
 import traceback
+from math import floor
 
 
 # Static info
@@ -30,7 +31,25 @@ def make_stats():
     Make the stats string to send to the server
     """
     mem = psutil.virtual_memory()
-    return f'%{hostname}:{cpu_count}_{psutil.cpu_percent()}_{mem.percent}#'
+    load = psutil.getloadavg()
+
+    battery_percent = -1
+    battery_time = -1
+    
+    battery = psutil.sensors_battery()
+
+    if battery is not None and not battery.power_plugged:
+        battery_percent = battery.percent
+
+        mm, ss = divmod(battery.secsleft, 60)
+        hh, mm = divmod(mm, 60)
+
+        battery_time = f'{hh}:{mm:02d}'
+
+    days_up = floor(time.monotonic() / 86400)
+
+
+    return f'%{hostname}:{cpu_count}_{psutil.cpu_percent()}_{mem.percent}_{load[0]:.2f}_{load[1]:.2f}_{battery_percent}_{battery_time}_{days_up}#'
 
 async def main(config):
     """
