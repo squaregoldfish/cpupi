@@ -41,8 +41,9 @@ def make_stats():
     if battery is not None and not battery.power_plugged:
         battery_percent = battery.percent
 
-        mm, ss = divmod(battery.secsleft, 60)
-        hh, mm = divmod(mm, 60)
+        if battery.secsleft > 0:
+            mm, ss = divmod(battery.secsleft, 60)
+            hh, mm = divmod(mm, 60)
 
         battery_time = f'{hh}:{mm:02d}'
 
