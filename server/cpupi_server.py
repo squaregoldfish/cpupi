@@ -56,7 +56,7 @@ async def receive_client(websocket):
         print(traceback.format_exc())
 
 def get_hostname(message):
-    p = re.compile('^%(.*):')
+    p = re.compile('^%(.*?):')
     return p.match(message).group(1)
 
 def make_stats_object(message):
