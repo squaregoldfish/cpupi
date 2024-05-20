@@ -1,3 +1,4 @@
 hostname = "my_hostname"
 server = "cpupi_server"
 port = "5784"
+debug = true

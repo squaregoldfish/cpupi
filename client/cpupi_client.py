@@ -33,8 +33,9 @@ def make_stats():
     mem = psutil.virtual_memory()
     load = psutil.getloadavg()
     days_up = floor(time.monotonic() / 86400)
+    total_ram = mem.total / 1073741824
 
-    return f'%{hostname}:{cpu_count}_{psutil.cpu_percent()}_{mem.percent}_{load[0]:.2f}_{load[1]:.2f}_{days_up}#'
+    return f'%{hostname}:{cpu_count}_{psutil.cpu_percent()}_{mem.percent}_{load[0]:.2f}_{load[1]:.2f}_{total_ram:.1f}#'
 
 async def main(config):
     """
@@ -48,7 +49,8 @@ async def main(config):
         try:
             while True:
                 stats = make_stats()
-                print(f'Sending {stats}')
+                if config['debug']:
+                    print(f'Sending {stats}')
                 await websocket.send(stats)
                 await websocket.recv()
                 time.sleep(1)

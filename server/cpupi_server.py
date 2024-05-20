@@ -11,6 +11,8 @@ import board
 import busio
 import adafruit_character_lcd.character_lcd_rgb_i2c as character_lcd
 
+DEBUG = False
+
 CLIENT_STATS = {}
 CLIENT_ORDER = []
 
@@ -47,7 +49,8 @@ async def receive_client(websocket):
     try:
         while True:
             message = await websocket.recv()
-            print(message)
+            if DEBUG:
+                print(message)
             hostname = get_hostname(message)
             CLIENT_STATS[hostname] = make_stats_object(message)
 
@@ -76,16 +79,18 @@ def make_stats_object(message):
     obj['mem_percent'] = values[2]
     obj['load1'] = values[3]
     obj['load5'] = values[4]
-    obj['uptime'] = values[5]
+    obj['mem_total'] = values[5]
     
     return obj
 
 def init(config):
+    global DEBUG
     global CLIENT_ORDER
     global CPU_METER
     global MEM_METER
     global LCD
 
+    DEBUG = config['debug']
     CLIENT_ORDER = config['client_order']
 
     CPU_METER = HardwarePWM(pwm_channel=0, hz=60, chip=0)
@@ -122,20 +127,21 @@ def stats_display():
             set_meter_percent(MEM_METER, stats['mem_percent'])
 
             if chosen_client != CURRENT_CLIENT:
+                print(f'Connected client {chosen_client}')
                 CURRENT_CLIENT = chosen_client
                 LCD.clear()
                 LCD.cursor_position(0, 0)
-                LCD.message = f'{stats["cores"]: >16}'
+                LCD.message = f'{stats["cores"] + "#": >16}'
                 LCD.cursor_position(0, 0)
                 LCD.message = chosen_client
                 LCD.cursor_position(0, 1)
+                LCD.message = f'{stats["mem_total"] + "G": >16}'
 
             # We only update the LCD stats every 5 seconds
             if datetime.now().second % 5 == 0:
                 load_string_1 = '**.**' if float(stats['load1']) > 100 else stats['load1']
                 load_string_5 = '**.**' if float(stats['load5']) > 100 else stats['load5']
-                uptime_string = f'{stats["uptime"]}d'
-                bottom_message = f'{load_string_1} {load_string_5} {uptime_string}'
+                bottom_message = f'{load_string_1} {load_string_5}'
 
                 load_percent = int(float(stats['load1']) / float(stats['cores']) * 100)
                 color = [0, 0, 0]
@@ -147,14 +153,14 @@ def stats_display():
                     color = [0, 100, 0]
                 elif load_percent >= 40:
                     color = [0, 100, 100]
-                elif load_percent >= 20:
-                    color = [100, 0, 100]
                 else:
-                    color = [0, 0, 100]
+                    color = [100, 0, 100]
+
+                # We used to have blue below 20%, but it doesn't display well
 
                 LCD.color = color
                 LCD.cursor_position(0, 1)
-                LCD.message = f'{bottom_message:<16}'
+                LCD.message = bottom_message
 
         time.sleep(1)
 
@@ -162,7 +168,7 @@ def clear_display():
     set_meter_percent(CPU_METER, 0)
     set_meter_percent(MEM_METER, 0)
     LCD.clear()
-    LCD.color = [0, 0, 100]
+    LCD.color = [0, 0, 0]
 
 def set_meter_percent(meter, percent):
     meter_value = float(percent)
