@@ -15,18 +15,20 @@ where [hostname] defines the name of the machine sending data, and a set of unde
 
 1. Number of CPU cores (integer)
 2. CPU usage (percent, float)
-3. Total RAM (bytes, integer)
-4. Used RAM (bytes, integer)
-5. Total swap (bytes, integer)
-6. Used swap (bytes, integer)
+3. Memory usage (percent, float)
+4. 1 minute load average (float)
+5. 5 minute load average (float)
+6. Total memory (Gibibytes, float)
+
+_The ordering is stupid because I'm a lazy programmer._
 
 An example string might be:
 
-`%madeleine:6_10.5_3890036736_2355015680_2147479552_1220452352`
+`%madeleine:6_34.7_72.2_3.14_3.28_3.6#`
 
-indicating that the client's hostname is madeleine, it has 6 CPU cores, and current CPU usage is 10.5%. The client has 3.62 Gibibytes of RAM, of which 2.19 Gibibytes is currently being used. The client is using 1.14 out of 2.19 Gibibytes of swap.
+indicating that the client's hostname is madeleine, it has 6 CPU cores, and current CPU usage is 34.7%. It has 3.6Gb RAM, of which 72.2% is in use. The 1 minute and 5 minute load averages are 3.14 and 3.28 respectively.
 
-The `%` symbol is simply used to indicate the start of a data string, and thus the end of a previous data string. This will allow the server to detect incomplete strings or other possible errors.
+The `%` and `#` symbols are used to indicate the start and end of a data string. This will allow the server to detect incomplete strings or other possible errors.
 
 ### Server
-The server will accept multiple connections from different clients. It will collect status strings from those clients (see above). It will choose which client's details to show according to its configuration.
+The server will accept multiple connections from different clients. It will collect status strings from those clients (see above). It will choose which client's details to show according to its configuration, which simply holds an ordered list of preferred hosts.
