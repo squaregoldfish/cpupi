@@ -161,4 +161,4 @@ cython_debug/
 
 README.html
 **/config.toml
-
+**/run.sh
