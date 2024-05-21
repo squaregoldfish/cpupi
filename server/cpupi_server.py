@@ -135,13 +135,26 @@ def stats_display():
                 LCD.cursor_position(0, 0)
                 LCD.message = chosen_client
                 LCD.cursor_position(0, 1)
-                LCD.message = f'{stats["mem_total"] + "G": >16}'
 
             # We only update the LCD stats every 5 seconds
             if datetime.now().second % 5 == 0:
                 load_string_1 = '**.**' if float(stats['load1']) > 100 else stats['load1']
                 load_string_5 = '**.**' if float(stats['load5']) > 100 else stats['load5']
-                bottom_message = f'{load_string_1} {load_string_5}'
+                
+                mem_total = float(stats["mem_total"])
+                if mem_total > 10:
+                    mem_string = f'{mem_total:.0f}G'
+                else:
+                    mem_string = f'{mem_total:.1f}G'
+
+                component_length = len(load_string_1) + len(load_string_5) + len(mem_string) + 2
+                pad = 16 - component_length
+                
+                bottom_message = f'{load_string_1} {load_string_5} '
+                for i in range(0, pad):
+                    bottom_message += ' '
+                
+                bottom_message += mem_string
 
                 load_percent = int(float(stats['load1']) / float(stats['cores']) * 100)
                 color = [0, 0, 0]
