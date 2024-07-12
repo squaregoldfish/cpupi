@@ -160,14 +160,12 @@ def stats_display():
                 color = [0, 0, 0]
                 if load_percent >= 100:
                     color = [100, 0, 0]
-                elif load_percent >= 80:
+                elif load_percent >= 66:
                     color = [100, 100, 0]
-                elif load_percent >= 60:
+                elif load_percent >= 33:
                     color = [0, 100, 0]
-                elif load_percent >= 40:
-                    color = [0, 100, 100]
                 else:
-                    color = [100, 0, 100]
+                    color = [100, 100, 100]
 
                 # We used to have blue below 20%, but it doesn't display well
 
