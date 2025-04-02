@@ -1,5 +1,5 @@
 # cpupi
-Code to view CPU/Memory usage of various computers using UV meters attached to a Raspberry Pi.
+Code to view CPU/Memory usage of various computers using VU meters attached to a Raspberry Pi.
 
 The idea is to display CPU usage and memory (both as a percentage) of a set of computers on two VU meters. Obviously only one computer's information can be displayed at a time, so an additional LCD display is used to provide more information about the computer whose details are being displayed.
 
