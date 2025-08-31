@@ -11,9 +11,12 @@ import board
 import busio
 import adafruit_character_lcd.character_lcd_rgb_i2c as character_lcd
 from num2words import num2words
+import locale
+from unidecode import unidecode
 
 
 DEBUG = False
+locale.setlocale(locale.LC_TIME, 'nl_NL.UTF8')
 
 CLIENT_STATS = {}
 CLIENT_ORDER = []
@@ -154,11 +157,11 @@ def stats_display():
 
                 if current_time_mode == TIME_MODE_TIME:
                     if now.hour == 0:
-                        hour_word = 'Twelve'
+                        hour_word = 'Twaalf'
                     elif now.hour < 13:
-                        hour_word = num2words(now.hour).capitalize()
+                        hour_word = unidecode(num2words(now.hour, lang='nl')).capitalize()
                     else:
-                        hour_word = num2words(now.hour - 12).capitalize()
+                        hour_word = unidecode(num2words(now.hour - 12, lang='nl')).capitalize()
 
                     hour_text = hour_word.center(16)
                     if now.hour < 12:
@@ -169,9 +172,9 @@ def stats_display():
                     if now.minute == 0:
                         minute_text = "o'clock"
                     elif now.minute < 10:
-                        minute_text = f"Oh {num2words(now.minute)}"
+                        minute_text = f"uur {unidecode(num2words(now.minute, lang='nl'))}"
                     else:
-                        minute_text = num2words(now.minute)
+                        minute_text = unidecode(num2words(now.minute, lang='nl'))
 
                     LCD.cursor_position(0, 0)
                     LCD.message = hour_text
