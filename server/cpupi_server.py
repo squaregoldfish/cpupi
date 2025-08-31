@@ -148,12 +148,18 @@ def stats_display():
             now = datetime.now()
 
             current_time_mode = TIME_MODE_TIME if now.second % 20 < 10 else TIME_MODE_DATE
+            color = [100, 100, 100]
 
             if current_time_mode != last_time_mode:
                 # Meters - percent of day and percent of year            
                 day_percent = (now.hour * 3600 + now.minute * 60 + now.second) / 86400 * 100
                 set_meter_percent(CPU_METER, day_percent)
                 set_meter_percent(MEM_METER, get_year_percent(now))
+
+                if now.hour >= 21 or now.hour <= 5:
+                    color = [100, 0, 0]
+                else:
+                    color = [100, 100, 100]
 
                 if current_time_mode == TIME_MODE_TIME:
                     if now.hour == 0:
@@ -198,7 +204,7 @@ def stats_display():
                     LCD.message = month_text
 
 
-                LCD.color = [100, 100, 100]
+                LCD.color = color
                 last_time_mode = current_time_mode
 
         else:
