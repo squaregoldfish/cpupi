@@ -4,7 +4,7 @@ Code to view CPU/Memory usage of various computers using VU meters attached to a
 The idea is to display CPU usage and memory (both as a percentage) of a set of computers on two VU meters. Obviously only one computer's information can be displayed at a time, so an additional LCD display is used to provide more information about the computer whose details are being displayed.
 
 ## Architecture
-The system uses a client/server architecture. The Raspberry Pi is be the server, and takes care of receiving information and displaying the details of the chosen clients' information. The clients connect to the server and send their system usage information to the server for display.
+The system uses a client/server architecture. The Raspberry Pi is the server, and takes care of receiving information and displaying the details of the chosen clients' information. The clients connect to the server and send their system usage information to the server for display.
 
 ### Clients
 Each client opens a connection to the server on startup. This connection is kept open for the duration of the client's life. Every _n_ seconds (_n_ is undetermined at the time of writing; it may be configurable), it sends details of the system usage as a simple encoded string as follows:
