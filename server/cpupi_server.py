@@ -170,17 +170,18 @@ def stats_display():
                         hour_text = hour_text[:15] + '|'
 
                     if now.minute == 0:
-                        minute_text = "o'clock"
+                        minute_text = "uur"
                     elif now.minute < 10:
                         minute_text = f"uur {unidecode(num2words(now.minute, lang='nl'))}"
                     else:
                         minute_text = unidecode(num2words(now.minute, lang='nl'))
 
+                    minute_text = minute_text.center(16)
+
                     LCD.cursor_position(0, 0)
                     LCD.message = hour_text
                     LCD.cursor_position(0, 1)
                     LCD.message = minute_text.center(16)
-
                 else:
                     day_text = now.strftime("%A").ljust(16)
                     if now.day < 10:
