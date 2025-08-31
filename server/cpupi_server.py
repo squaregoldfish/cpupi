@@ -10,6 +10,8 @@ from rpi_hardware_pwm import HardwarePWM
 import board
 import busio
 import adafruit_character_lcd.character_lcd_rgb_i2c as character_lcd
+from num2words import num2words
+
 
 DEBUG = False
 
@@ -21,6 +23,9 @@ MEM_METER = None
 LCD = None
 
 CURRENT_CLIENT = None
+
+TIME_MODE_TIME = 0
+TIME_MODE_DATE = 1
 
 async def main(config):
     # Start the display thread
@@ -101,10 +106,27 @@ def init(config):
     i2c = busio.I2C(board.SCL, board.SDA)
     LCD = character_lcd.Character_LCD_RGB_I2C(i2c, 16, 2)
 
-    clear_display()
+    #clear_display()
+
+def get_year_percent(timestamp):
+    # Start and end of the year
+    start_of_year = datetime(timestamp.year, 1, 1)
+    start_of_next_year = datetime(timestamp.year + 1, 1, 1)
+    
+    # Total seconds in the year
+    total_seconds_in_year = (start_of_next_year - start_of_year).total_seconds()
+    
+    # Seconds passed since the start of the year
+    seconds_passed = (timestamp - start_of_year).total_seconds()
+    
+    # Percentage of year passed
+    percentage = (seconds_passed / total_seconds_in_year) * 100
+    return percentage
 
 def stats_display():
     global CURRENT_CLIENT
+
+    last_time_mode = -1
 
     while True:
         chosen_client = None
@@ -118,9 +140,65 @@ def stats_display():
             chosen_client = sorted(CLIENT_STATS.keys())[0]
 
         if chosen_client is None:
-            clear_display()
             CURRENT_CLIENT = None
+
+            now = datetime.now()
+
+            current_time_mode = TIME_MODE_TIME if now.second % 20 < 10 else TIME_MODE_DATE
+
+            if current_time_mode != last_time_mode:
+                # Meters - percent of day and percent of year            
+                day_percent = (now.hour * 3600 + now.minute * 60 + now.second) / 86400 * 100
+                set_meter_percent(CPU_METER, day_percent)
+                set_meter_percent(MEM_METER, get_year_percent(now))
+
+                if current_time_mode == TIME_MODE_TIME:
+                    if now.hour == 0:
+                        hour_word = 'Twelve'
+                    elif now.hour < 13:
+                        hour_word = num2words(now.hour).capitalize()
+                    else:
+                        hour_word = num2words(now.hour - 12).capitalize()
+
+                    hour_text = hour_word.center(16)
+                    if now.hour < 13:
+                        hour_text = '|' + hour_text[1:]
+                    else:
+                        hour_text = hour_text[:1] + '|'
+
+                    if now.minute == 0:
+                        minute_text = "o'clock"
+                    elif now.minute < 10:
+                        minute_text = f"Oh {num2words(now.minute)}"
+                    else:
+                        minute_text = num2words(now.minute)
+
+                    LCD.cursor_position(0, 0)
+                    LCD.message = hour_text
+                    LCD.cursor_position(0, 1)
+                    LCD.message = minute_text.center(16)
+
+                else:
+                    day_text = now.strftime("%A").ljust(16)
+                    if now.day < 10:
+                        day_text = day_text[:13] + str(now.day)
+                    else:
+                        day_text = day_text[:14] + str(now.day)
+
+                    month_text = now.strftime("%B").ljust(16)
+                    month_text = month_text[:12] + str(now.year)
+
+                    LCD.cursor_position(0, 0)
+                    LCD.message = day_text
+                    LCD.cursor_position(0, 1)
+                    LCD.message = month_text
+
+
+                LCD.color = [100, 100, 100]
+                last_time_mode = current_time_mode
+
         else:
+            last_time_mode = -1
             stats = CLIENT_STATS[chosen_client]
             # Set the meters
             set_meter_percent(CPU_METER, stats['cpu_percent'])

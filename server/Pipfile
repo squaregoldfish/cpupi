@@ -9,6 +9,7 @@ adafruit-circuitpython-charlcd = "*"
 rpi-hardware-pwm = "*"
 toml = "*"
 websockets = "*"
+num2words = "*"
 
 [dev-packages]
 
