@@ -170,10 +170,10 @@ def stats_display():
                         hour_word = unidecode(num2words(now.hour - 12, lang='nl')).capitalize()
 
                     hour_text = hour_word.center(16)
-                    if now.hour < 12:
-                        hour_text = '|' + hour_text[1:]
-                    else:
-                        hour_text = hour_text[:15] + '|'
+                    #if now.hour < 12:
+                    #    hour_text = '|' + hour_text[1:]
+                    #else:
+                    #    hour_text = hour_text[:15] + '|'
 
                     if now.minute == 0:
                         minute_text = "uur"
