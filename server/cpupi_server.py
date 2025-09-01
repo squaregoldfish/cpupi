@@ -189,14 +189,8 @@ def stats_display():
                     LCD.cursor_position(0, 1)
                     LCD.message = minute_text.center(16)
                 else:
-                    day_text = now.strftime("%A").ljust(16)
-                    if now.day < 10:
-                        day_text = day_text[:13] + str(now.day)
-                    else:
-                        day_text = day_text[:14] + str(now.day)
-
-                    month_text = now.strftime("%B").ljust(16)
-                    month_text = month_text[:12] + str(now.year)
+                    day_text = f'{now.strftime("%A")}'.center(16)
+                    month_text = f'{now.day} {now.strftime("%B")}'.center(16)
 
                     LCD.cursor_position(0, 0)
                     LCD.message = day_text
