@@ -192,7 +192,7 @@ def stats_display():
                     if now.minute == 0:
                         minute_text = "uur"
                     elif now.minute < 10:
-                        minute_text = num2words(now.minute, lang='nl')
+                        minute_text = f"uur {num2words(now.minute, lang='nl')}"
                     else:
                         minute_text = num2words(now.minute, lang='nl')
 
