@@ -12,8 +12,6 @@ import busio
 import adafruit_character_lcd.character_lcd_rgb_i2c as character_lcd
 from num2words import num2words
 import locale
-from unidecode import unidecode
-
 
 DEBUG = False
 locale.setlocale(locale.LC_TIME, 'nl_NL.UTF8')
@@ -27,8 +25,13 @@ LCD = None
 
 CURRENT_CLIENT = None
 
+# Clock mode
 TIME_MODE_TIME = 0
 TIME_MODE_DATE = 1
+
+# Special characters
+E_ACUTE = [0x2,0x4,0xe,0x11,0x1f,0x10,0xe,0x0]
+E_UMLAUT = [0xa,0x0,0xe,0x11,0x1f,0x10,0xe,0x0]
 
 async def main(config):
     # Start the display thread
@@ -109,6 +112,10 @@ def init(config):
     i2c = busio.I2C(board.SCL, board.SDA)
     LCD = character_lcd.Character_LCD_RGB_I2C(i2c, 16, 2)
 
+    # Initialise special characters
+    LCD.create_char(0, E_ACUTE)
+    LCD.create_char(1, E_UMLAUT)
+
     #clear_display()
 
 def get_year_percent(timestamp):
@@ -125,6 +132,11 @@ def get_year_percent(timestamp):
     # Percentage of year passed
     percentage = (seconds_passed / total_seconds_in_year) * 100
     return percentage
+
+def set_special_chars(string):
+    repl_one = string.replace('é', '\x00')
+    repl_two = repl_one.replace('ë', '\x01')
+    return repl_two
 
 def stats_display():
     global CURRENT_CLIENT
@@ -165,11 +177,13 @@ def stats_display():
                     if now.hour == 0:
                         hour_word = 'Twaalf'
                     elif now.hour < 13:
-                        hour_word = unidecode(num2words(now.hour, lang='nl')).capitalize()
+                        hour_word = num2words(now.hour, lang='nl').capitalize()
                     else:
-                        hour_word = unidecode(num2words(now.hour - 12, lang='nl')).capitalize()
+                        hour_word = num2words(now.hour - 12, lang='nl').capitalize()
 
                     hour_text = hour_word.center(16)
+
+                    # AM/PM Indicator
                     #if now.hour < 12:
                     #    hour_text = '|' + hour_text[1:]
                     #else:
@@ -178,16 +192,16 @@ def stats_display():
                     if now.minute == 0:
                         minute_text = "uur"
                     elif now.minute < 10:
-                        minute_text = f"uur {unidecode(num2words(now.minute, lang='nl'))}"
+                        minute_text = num2words(now.minute, lang='nl')
                     else:
-                        minute_text = unidecode(num2words(now.minute, lang='nl'))
+                        minute_text = num2words(now.minute, lang='nl')
 
                     minute_text = minute_text.center(16)
 
                     LCD.cursor_position(0, 0)
-                    LCD.message = hour_text
+                    LCD.message = set_special_chars(hour_text)
                     LCD.cursor_position(0, 1)
-                    LCD.message = minute_text.center(16)
+                    LCD.message = set_special_chars(minute_text)
                 else:
                     day_text = f'{now.strftime("%A")}'.center(16)
                     month_text = f'{now.day} {now.strftime("%B")}'.center(16)

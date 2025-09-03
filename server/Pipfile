@@ -10,7 +10,6 @@ rpi-hardware-pwm = "*"
 toml = "*"
 websockets = "*"
 num2words = "*"
-unidecode = "*"
 
 [dev-packages]
 
