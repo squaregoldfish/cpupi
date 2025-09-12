@@ -181,7 +181,7 @@ def stats_display():
                     else:
                         hour_word = num2words(now.hour - 12, lang='nl').capitalize()
 
-                    hour_text = hour_word.center(16)
+                    hour_text = (hour_word + ' uur').center(16)
 
                     # AM/PM Indicator
                     #if now.hour < 12:
@@ -190,9 +190,7 @@ def stats_display():
                     #    hour_text = hour_text[:15] + '|'
 
                     if now.minute == 0:
-                        minute_text = "uur"
-                    elif now.minute < 10:
-                        minute_text = f"uur {num2words(now.minute, lang='nl')}"
+                        minute_text = ""
                     else:
                         minute_text = num2words(now.minute, lang='nl')
 
