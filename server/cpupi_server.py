@@ -30,8 +30,13 @@ TIME_MODE_TIME = 0
 TIME_MODE_DATE = 1
 
 # Special characters
-E_ACUTE = [0x2,0x4,0xe,0x11,0x1f,0x10,0xe,0x0]
-E_UMLAUT = [0xa,0x0,0xe,0x11,0x1f,0x10,0xe,0x0]
+E_ACUTE_CHAR = [0x2,0x4,0xe,0x11,0x1f,0x10,0xe,0x0]
+E_ACUTE_UPPER_CHAR = [0x2,0x4,0xf,0x8,0xe,0x8,0xf,0x0]
+E_UMLAUT_CHAR = [0xa,0x0,0xe,0x11,0x1f,0x10,0xe,0x0]
+
+E_ACUTE_BYTE = '\x00'
+E_ACUTE_UPPER_BYTE = '\x01'
+E_UMLAUT_BYTE = '\x02'
 
 async def main(config):
     # Start the display thread
@@ -113,8 +118,9 @@ def init(config):
     LCD = character_lcd.Character_LCD_RGB_I2C(i2c, 16, 2)
 
     # Initialise special characters
-    LCD.create_char(0, E_ACUTE)
-    LCD.create_char(1, E_UMLAUT)
+    LCD.create_char(0, E_ACUTE_CHAR)
+    LCD.create_char(1, E_ACUTE_UPPER_CHAR)
+    LCD.create_char(2, E_UMLAUT_CHAR)
 
     #clear_display()
 
@@ -134,9 +140,9 @@ def get_year_percent(timestamp):
     return percentage
 
 def set_special_chars(string):
-    repl_one = string.replace('é', '\x00')
-    repl_two = repl_one.replace('ë', '\x01')
-    return repl_two
+    return string.replace('é', E_ACUTE_BYTE) \
+        .replace('É', E_ACUTE_UPPER_BYTE) \
+        .replace('ë', E_UMLAUT_BYTE)
 
 def stats_display():
     global CURRENT_CLIENT
