@@ -33,4 +33,4 @@ The `%` and `#` symbols are used to indicate the start and end of a data string.
 ### Server
 The server will accept multiple connections from different clients. It will collect status strings from those clients (see above). It will choose which client's details to show according to its configuration, which simply holds an ordered list of preferred hosts.
 
-When no clients are connected, the server displays the current time. The text display alternates between the time and date every 10 seconds, written in words in Dutch (because that's what I want). The two meters display the percentage passed of the current day on the left, and the percentage passed of the current year on the right.
+When no clients are connected, the server displays the current time. The text display alternates between the time and date every 10 seconds, written in words in Dutch (because that's what I want). The two meters display the percentage passed of the current month on the CPU meter and the percentage passed of the current year on the memory meter.

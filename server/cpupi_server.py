@@ -12,6 +12,7 @@ import busio
 import adafruit_character_lcd.character_lcd_rgb_i2c as character_lcd
 from num2words import num2words
 import locale
+import calendar
 
 DEBUG = False
 locale.setlocale(locale.LC_TIME, 'nl_NL.UTF8')
@@ -139,6 +140,16 @@ def get_year_percent(timestamp):
     percentage = (seconds_passed / total_seconds_in_year) * 100
     return percentage
 
+def get_month_percent(timestamp):
+    seconds_in_month = calendar.monthrange(timestamp.year, timestamp.month)[1] * 86400
+    seconds_to_date = (timestamp.day - 1) * 86400
+    seconds_to_date += timestamp.hour * 3600
+    seconds_to_date += timestamp.minute * 60
+    seconds_to_date += timestamp.second
+
+    return seconds_to_date / seconds_in_month * 100
+
+
 def set_special_chars(string):
     return string.replace('é', E_ACUTE_BYTE) \
         .replace('É', E_ACUTE_UPPER_BYTE) \
@@ -170,8 +181,8 @@ def stats_display():
 
             if current_time_mode != last_time_mode:
                 # Meters - percent of day and percent of year            
-                day_percent = (now.hour * 3600 + now.minute * 60 + now.second) / 86400 * 100
-                set_meter_percent(CPU_METER, day_percent)
+                #day_percent = (now.hour * 3600 + now.minute * 60 + now.second) / 86400 * 100
+                set_meter_percent(CPU_METER, get_month_percent(now))
                 set_meter_percent(MEM_METER, get_year_percent(now))
 
                 if now.hour >= 21 or now.hour <= 5:
