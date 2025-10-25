@@ -218,7 +218,7 @@ def stats_display():
                     LCD.cursor_position(0, 1)
                     LCD.message = set_special_chars(minute_text)
                 else:
-                    day_text = f'{now.strftime("%A")}'.center(16)
+                    day_text = f'{now.strftime("%A")} \'{now.strftime("%y")}'.center(16)
                     month_text = f'{now.day} {now.strftime("%B")}'.center(16)
 
                     LCD.cursor_position(0, 0)
