@@ -10,6 +10,8 @@ rpi-hardware-pwm = "*"
 toml = "*"
 websockets = "*"
 num2words = "*"
+astral = "*"
+pytz = "*"
 
 [dev-packages]
 

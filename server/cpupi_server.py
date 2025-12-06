@@ -13,6 +13,10 @@ import adafruit_character_lcd.character_lcd_rgb_i2c as character_lcd
 from num2words import num2words
 import locale
 import calendar
+from astral import LocationInfo
+from astral.sun import sun
+from datetime import datetime, timedelta
+import pytz
 
 DEBUG = False
 locale.setlocale(locale.LC_TIME, 'nl_NL.UTF8')
@@ -25,6 +29,10 @@ MEM_METER = None
 LCD = None
 
 CURRENT_CLIENT = None
+
+# Location info
+TIMEZONE = None
+LOCATION = None
 
 # Clock mode
 TIME_MODE_TIME = 0
@@ -106,6 +114,14 @@ def init(config):
     global CPU_METER
     global MEM_METER
     global LCD
+    global TIMEZONE
+    global LOCATION
+
+    TIMEZONE = pytz.timezone(config['timezone'])
+    LOCATION = LocationInfo('Here', 'Country', config['longitude'], config['latitude'])
+
+    LATITUDE = config['latitude']
+    LONGITUDE = config['longitude']
 
     DEBUG = config['debug']
     CLIENT_ORDER = config['client_order']
@@ -126,9 +142,11 @@ def init(config):
     #clear_display()
 
 def get_year_percent(timestamp):
+    global TIMEZONE
+
     # Start and end of the year
-    start_of_year = datetime(timestamp.year, 1, 1)
-    start_of_next_year = datetime(timestamp.year + 1, 1, 1)
+    start_of_year = TIMEZONE.localize(datetime(timestamp.year, 1, 1))
+    start_of_next_year = TIMEZONE.localize(datetime(timestamp.year + 1, 1, 1))
     
     # Total seconds in the year
     total_seconds_in_year = (start_of_next_year - start_of_year).total_seconds()
@@ -155,8 +173,29 @@ def set_special_chars(string):
         .replace('É', E_ACUTE_UPPER_BYTE) \
         .replace('ë', E_UMLAUT_BYTE)
 
+def get_time_color(time):
+    global TIMEZONE
+    global LOCATION
+
+    s = sun(LOCATION.observer, date=time)
+
+    if time < s['dawn'].astimezone(TIMEZONE):
+        color = [100, 0, 0]
+    elif time < s['sunrise'].astimezone(TIMEZONE):
+        color = [100, 100, 0]
+    elif time < s['sunset'].astimezone(TIMEZONE):
+        color = [100, 100, 100]
+    elif time < s['dusk'].astimezone(TIMEZONE):
+        color = [100, 100, 0]
+    else:
+        color = [100, 0, 0]
+
+    return color
+
+
 def stats_display():
     global CURRENT_CLIENT
+    global TIMEZONE
 
     last_time_mode = -1
 
@@ -174,7 +213,7 @@ def stats_display():
         if chosen_client is None:
             CURRENT_CLIENT = None
 
-            now = datetime.now()
+            now = datetime.now(TIMEZONE)
 
             current_time_mode = TIME_MODE_TIME if now.second % 20 < 10 else TIME_MODE_DATE
             color = [100, 100, 100]
@@ -185,11 +224,7 @@ def stats_display():
                 set_meter_percent(CPU_METER, get_month_percent(now))
                 set_meter_percent(MEM_METER, get_year_percent(now))
 
-                if now.hour >= 21 or now.hour <= 5:
-                    color = [100, 0, 0]
-                else:
-                    color = [100, 100, 100]
-
+                color = get_time_color(now)
                 if current_time_mode == TIME_MODE_TIME:
                     if now.hour == 0:
                         hour_word = 'Twaalf'
